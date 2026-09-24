@@ -1,0 +1,91 @@
+.cartao {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: 11px;
+  transition: transform var(--transicao), box-shadow var(--transicao);
+}
+
+.cartao:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--sombra);
+}
+
+.capa {
+  height: 150px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.capa span {
+  font-family: var(--fonte-logo);
+  font-size: 3.2rem;
+  color: rgba(255, 255, 255, 0.9);
+  transition: transform 0.5s ease;
+}
+
+.cartao:hover .capa span {
+  transform: scale(1.12);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+}
+
+.linha {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.linha h3 {
+  font-size: 1.1rem;
+}
+
+.nota {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.nota svg {
+  color: var(--cor-dourado);
+}
+
+.nota small {
+  font-weight: 400;
+  color: var(--cor-texto-suave);
+}
+
+.bairro {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: var(--cor-texto-suave);
+}
+
+.servicos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.servicos li {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--cor-fundo);
+  font-size: 0.8rem;
+  color: var(--cor-texto-suave);
+}

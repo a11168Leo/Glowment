@@ -1,0 +1,29 @@
+.pagina {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  text-align: center;
+}
+
+.selo {
+  display: inline-block;
+  margin-bottom: 16px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--cor-primaria-clara);
+  color: var(--cor-primaria-escura);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.pagina h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  margin-bottom: 12px;
+}
+
+.pagina p {
+  max-width: 440px;
+  margin: 0 auto 28px;
+  color: var(--cor-texto-suave);
+}

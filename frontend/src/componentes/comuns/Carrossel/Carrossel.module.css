@@ -1,0 +1,84 @@
+.topo {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.topo h2 {
+  font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+  margin-bottom: 4px;
+}
+
+.topo p {
+  color: var(--cor-texto-suave);
+}
+
+.setas {
+  display: flex;
+  flex-shrink: 0;
+  gap: 10px;
+}
+
+.seta {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--cor-borda);
+  border-radius: 50%;
+  background: var(--cor-superficie);
+  transition: background var(--transicao), color var(--transicao), border-color var(--transicao),
+    opacity var(--transicao);
+}
+
+.seta:hover:not(:disabled) {
+  background: var(--cor-texto);
+  border-color: var(--cor-texto);
+  color: #fff;
+}
+
+.seta:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* 4 cartões visíveis no computador */
+.trilho {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: calc((100% - 3 * 20px) / 4);
+  gap: 20px;
+  padding: 8px 0 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.trilho::-webkit-scrollbar {
+  display: none;
+}
+
+.trilho > * {
+  scroll-snap-align: start;
+}
+
+/* Tablet: 2 cartões e meio (o "meio" mostra que dá para deslizar) */
+@media (max-width: 1000px) {
+  .trilho {
+    grid-auto-columns: calc((100% - 2 * 20px) / 2.5);
+  }
+}
+
+/* Celular: 1 cartão e um pedaço do próximo, sem setas */
+@media (max-width: 640px) {
+  .trilho {
+    grid-auto-columns: 82%;
+    gap: 14px;
+  }
+
+  .setas {
+    display: none;
+  }
+}

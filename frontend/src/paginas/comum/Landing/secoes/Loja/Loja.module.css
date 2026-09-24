@@ -1,0 +1,116 @@
+.loja {
+  background: var(--cor-superficie);
+  border-top: 1px solid var(--cor-borda);
+}
+
+.topo {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.topo h2 {
+  font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+  margin-bottom: 4px;
+}
+
+.topo p {
+  color: var(--cor-texto-suave);
+}
+
+.verTudo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  font-weight: 700;
+  color: var(--cor-primaria);
+}
+
+.verTudo svg {
+  transition: transform var(--transicao);
+}
+
+.verTudo:hover svg {
+  transform: translateX(4px);
+}
+
+/* Filtros por categoria */
+.filtros {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 28px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.filtros::-webkit-scrollbar {
+  display: none;
+}
+
+.filtro {
+  flex-shrink: 0;
+  padding: 8px 18px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--cor-texto-suave);
+  transition: background var(--transicao), color var(--transicao), border-color var(--transicao);
+}
+
+.filtro:hover {
+  border-color: var(--cor-texto);
+  color: var(--cor-texto);
+}
+
+.filtroAtivo,
+.filtroAtivo:hover {
+  background: var(--cor-texto);
+  border-color: var(--cor-texto);
+  color: #fff;
+}
+
+/* Grade de produtos: 4 por linha no computador */
+.grade {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.entrar {
+  animation: entrar 0.5s ease both;
+}
+
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 1000px) {
+  .grade {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Celular: 2 por linha, e o link "ver loja" vai para baixo do texto */
+@media (max-width: 640px) {
+  .grade {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .topo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}

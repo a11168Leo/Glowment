@@ -1,0 +1,90 @@
+.hero {
+  position: relative;
+  isolation: isolate; /* mantém o fundo animado atrás do conteúdo */
+  min-height: calc(100vh - var(--altura-cabecalho));
+  display: flex;
+  align-items: center;
+  padding: 64px 0;
+}
+
+.texto {
+  text-align: center;
+}
+
+.texto h1 {
+  max-width: 900px;
+  margin: 0 auto 24px;
+  font-size: clamp(2.4rem, 6vw, 4.5rem);
+}
+
+.texto h1 em {
+  color: var(--cor-primaria);
+}
+
+.texto > p {
+  max-width: 620px;
+  margin: 0 auto;
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  color: var(--cor-texto-suave);
+}
+
+/* A barra de pesquisa surge depois que o título termina de ser digitado */
+.pesquisa {
+  margin-top: 48px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease, transform 0.8s ease, visibility 0.8s;
+}
+
+.pesquisaVisivel {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+/* Total de agendamentos do dia */
+.agendamentos {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.agendamentos strong {
+  font-size: 1.6rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums; /* números não "tremem" enquanto sobem */
+}
+
+.legenda {
+  font-family: var(--fonte-logo);
+  font-size: 1.35rem;
+  color: var(--cor-texto-suave);
+}
+
+/* Bolinha pulsando de "ao vivo" */
+.aoVivo {
+  position: relative;
+  align-self: center;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cor-primaria);
+}
+
+.aoVivo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--cor-primaria);
+  animation: pulsar 2s ease-out infinite;
+}
+
+@keyframes pulsar {
+  to {
+    transform: scale(3);
+    opacity: 0;
+  }
+}

@@ -1,0 +1,6 @@
+/* Espaço entre o carrossel de salões e o de barbearias */
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 72px;
+}

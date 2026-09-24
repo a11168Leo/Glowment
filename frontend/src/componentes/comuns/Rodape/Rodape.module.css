@@ -1,0 +1,71 @@
+.rodape {
+  padding-top: 64px;
+  background: var(--cor-texto);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Marca à esquerda e as três colunas à direita */
+.grade {
+  display: grid;
+  grid-template-columns: 1.6fr repeat(3, 1fr);
+  gap: 40px;
+  padding-bottom: 48px;
+}
+
+.logo {
+  font-family: var(--fonte-logo);
+  font-size: 2rem;
+  color: #fff;
+}
+
+.logo span {
+  color: var(--cor-dourado);
+}
+
+.marca p {
+  max-width: 260px;
+  margin-top: 8px;
+}
+
+.grade h4 {
+  margin-bottom: 14px;
+  font-family: var(--fonte-texto);
+  font-size: 0.95rem;
+  color: #fff;
+}
+
+.grade li + li {
+  margin-top: 10px;
+}
+
+.grade li a {
+  font-size: 0.95rem;
+  transition: color var(--transicao);
+}
+
+.grade li a:hover {
+  color: var(--cor-dourado);
+}
+
+.base {
+  padding-top: 20px;
+  padding-bottom: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 820px) {
+  .grade {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .marca {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 480px) {
+  .grade {
+    grid-template-columns: 1fr;
+  }
+}

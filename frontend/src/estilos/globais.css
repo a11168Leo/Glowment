@@ -1,0 +1,114 @@
+/* ===== Variáveis: mude aqui para alterar o site inteiro ===== */
+:root {
+  --cor-fundo: #f7f5f2;
+  --cor-superficie: #ffffff;
+  --cor-texto: #1c1b1a;
+  --cor-texto-suave: #625d57;
+  --cor-primaria: #946535;
+  --cor-primaria-escura: #7a5229;
+  --cor-primaria-clara: #f1e7da;
+  --cor-dourado: #c29a5b;
+  --cor-borda: #e6e0d8;
+
+  --fonte-titulo: 'PT Sans', system-ui, sans-serif;
+  --fonte-texto: 'PT Sans', system-ui, sans-serif;
+  --fonte-logo: 'Italiana', Georgia, serif;
+
+  --raio: 14px;
+  --raio-grande: 24px;
+  --sombra: 0 10px 30px rgba(43, 29, 42, 0.08);
+  --transicao: 0.25s ease;
+
+  --largura-maxima: 1180px;
+  --altura-cabecalho: 72px;
+}
+
+/* ===== Reset ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--altura-cabecalho);
+}
+
+body {
+  font-family: var(--fonte-texto);
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+ul {
+  list-style: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--cor-primaria);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ===== Utilitários de layout ===== */
+.container {
+  width: 100%;
+  max-width: var(--largura-maxima);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.secao {
+  padding: 96px 0;
+}
+
+.titulo-secao {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.subtitulo-secao {
+  max-width: 560px;
+  margin: 0 auto 56px;
+  text-align: center;
+  color: var(--cor-texto-suave);
+}
+
+@media (max-width: 640px) {
+  .secao {
+    padding: 64px 0;
+  }
+}

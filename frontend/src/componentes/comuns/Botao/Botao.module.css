@@ -1,0 +1,61 @@
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
+  white-space: nowrap;
+  border-radius: 999px;
+  transition: transform var(--transicao), background var(--transicao),
+    color var(--transicao), box-shadow var(--transicao);
+}
+
+.botao:hover {
+  transform: translateY(-2px);
+}
+
+.botao:active {
+  transform: translateY(0);
+}
+
+/* Tamanhos */
+.medio {
+  padding: 10px 22px;
+  font-size: 0.95rem;
+}
+
+.grande {
+  padding: 15px 30px;
+  font-size: 1rem;
+}
+
+/* Variantes */
+.primario {
+  background: var(--cor-primaria);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(148, 101, 53, 0.3);
+}
+
+.primario:hover {
+  background: var(--cor-primaria-escura);
+  box-shadow: 0 10px 24px rgba(148, 101, 53, 0.35);
+}
+
+.secundario {
+  border: 1.5px solid var(--cor-texto);
+  color: var(--cor-texto);
+}
+
+.secundario:hover {
+  background: var(--cor-texto);
+  color: #fff;
+}
+
+.claro {
+  background: #fff;
+  color: var(--cor-texto);
+}
+
+.claro:hover {
+  background: var(--cor-primaria-clara);
+}
