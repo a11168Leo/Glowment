@@ -19,6 +19,9 @@ declare
   v_ana    uuid := 'a0000000-0000-4000-8000-000000000003';  -- cliente
   v_rui    uuid := 'a0000000-0000-4000-8000-000000000004';  -- cliente
   v_esperto uuid := 'a0000000-0000-4000-8000-000000000005'; -- tenta registar-se como admin
+  v_bia    uuid := 'a0000000-0000-4000-8000-000000000006';  -- cliente (testa o ritmo de marcações)
+  v_caio   uuid := 'a0000000-0000-4000-8000-000000000007';  -- cliente com 3 faltas
+  v_robo   uuid := 'a0000000-0000-4000-8000-000000000008';  -- conta com email por confirmar
 
   v_salao uuid; v_salao_oculto uuid; v_servico uuid; v_prof uuid;
   v_marcacao uuid; v_marcacao_antiga uuid;
@@ -35,12 +38,16 @@ begin
   -- ================================================================
   -- T1 · O registo cria o perfil automaticamente (ninguém se regista como admin)
   -- ================================================================
-  insert into auth.users (id, email, raw_user_meta_data) values
-    (v_prop,    'teste-joao@glowment.test',  '{"nome":"João","tipo":"proprietario"}'),
-    (v_prop2,   'teste-marta@glowment.test', '{"nome":"Marta","tipo":"proprietario"}'),
-    (v_ana,     'teste-ana@glowment.test',   '{"nome":"Ana"}'),
-    (v_rui,     'teste-rui@glowment.test',   '{"nome":"Rui"}'),
-    (v_esperto, 'teste-esperto@glowment.test','{"nome":"Esperto","tipo":"admin"}');
+  -- email_confirmed_at: data em que o email foi confirmado (vazio = por confirmar)
+  insert into auth.users (id, email, raw_user_meta_data, email_confirmed_at) values
+    (v_prop,    'teste-joao@glowment.test',   '{"nome":"João","tipo":"proprietario"}', now()),
+    (v_prop2,   'teste-marta@glowment.test',  '{"nome":"Marta","tipo":"proprietario"}', now()),
+    (v_ana,     'teste-ana@glowment.test',    '{"nome":"Ana"}', now()),
+    (v_rui,     'teste-rui@glowment.test',    '{"nome":"Rui"}', now()),
+    (v_esperto, 'teste-esperto@glowment.test','{"nome":"Esperto","tipo":"admin"}', now()),
+    (v_bia,     'teste-bia@glowment.test',    '{"nome":"Bia"}', now()),
+    (v_caio,    'teste-caio@glowment.test',   '{"nome":"Caio"}', now()),
+    (v_robo,    'teste-robo@glowment.test',   '{"nome":"Robô"}', null);
 
   if (select tipo from public.perfis where id = v_prop) = 'proprietario'
      and (select tipo from public.perfis where id = v_ana) = 'cliente'
@@ -319,12 +326,155 @@ begin
   else v_falhas := v_falhas || ('T24: marcacoes_hoje = ' || v_n); end if;
 
   -- ================================================================
+  -- T25 · O proprietário não marca no próprio salão
+  -- ================================================================
+  perform set_config('role', 'authenticated', true);
+  perform set_config('request.jwt.claim.sub', v_prop::text, true);
+  begin
+    insert into public.marcacoes (profissional_id, servico_id, inicio)
+    values (v_prof, v_servico, (v_seg + time '16:00') at time zone 'Europe/Lisbon');
+    v_falhas := v_falhas || 'T25: o proprietário marcou no próprio salão'::text;
+  exception when others then v_ok := v_ok + 1;
+  end;
+
+  -- ================================================================
+  -- T26 · Não se marca a mais de 90 dias
+  -- ================================================================
+  perform set_config('request.jwt.claim.sub', v_ana::text, true);
+  begin
+    insert into public.marcacoes (profissional_id, servico_id, inicio)
+    values (v_prof, v_servico, (v_seg + 98 + time '10:00') at time zone 'Europe/Lisbon');
+    v_falhas := v_falhas || 'T26: aceitou uma marcação a mais de 90 dias'::text;
+  exception when others then v_ok := v_ok + 1;
+  end;
+
+  -- ================================================================
+  -- T27 · No máximo 2 marcações em aberto no mesmo salão
+  --        (o Rui já tem as 10:00 e as 10:30)
+  -- ================================================================
+  perform set_config('request.jwt.claim.sub', v_rui::text, true);
+  begin
+    insert into public.marcacoes (profissional_id, servico_id, inicio)
+    values (v_prof, v_servico, (v_seg + time '11:00') at time zone 'Europe/Lisbon');
+    v_falhas := v_falhas || 'T27: aceitou uma 3.ª marcação no mesmo salão'::text;
+  exception when others then v_ok := v_ok + 1;
+  end;
+
+  -- ================================================================
+  -- T28 · Um proprietário tem no máximo 5 salões (o João já tem 2)
+  -- ================================================================
+  perform set_config('request.jwt.claim.sub', v_prop::text, true);
+  begin
+    insert into public.saloes (nome, slug, morada, codigo_postal, cidade) values
+      ('Extra 3', 'teste-extra-3', 'Rua', '2495-000', 'Fátima'),
+      ('Extra 4', 'teste-extra-4', 'Rua', '2495-000', 'Fátima'),
+      ('Extra 5', 'teste-extra-5', 'Rua', '2495-000', 'Fátima');
+    begin
+      insert into public.saloes (nome, slug, morada, codigo_postal, cidade)
+      values ('Extra 6', 'teste-extra-6', 'Rua', '2495-000', 'Fátima');
+      v_falhas := v_falhas || 'T28: aceitou um 6.º salão'::text;
+    exception when others then v_ok := v_ok + 1;
+    end;
+  exception when others then
+    v_falhas := v_falhas || ('T28: recusou os salões 3 a 5: ' || sqlerrm);
+  end;
+
+  -- ================================================================
+  -- T29 · Um proprietário não liga a conta de outra pessoa a um profissional
+  -- ================================================================
+  begin
+    update public.profissionais set perfil_id = v_ana where id = v_prof;
+    v_falhas := v_falhas || 'T29: ligou a conta de outra pessoa a um profissional'::text;
+  exception when others then v_ok := v_ok + 1;
+  end;
+
+  -- ================================================================
+  -- T30 · Um serviço não pode mudar de salão
+  -- ================================================================
+  begin
+    update public.servicos set salao_id = v_salao_oculto where id = v_servico;
+    v_falhas := v_falhas || 'T30: um serviço mudou de salão'::text;
+  exception when others then v_ok := v_ok + 1;
+  end;
+
+  -- ================================================================
+  -- T31 · Um visitante não consegue chamar as funções internas
+  -- ================================================================
+  perform set_config('role', 'anon', true);
+  perform set_config('request.jwt.claim.sub', '', true);
+  begin
+    perform privado.tipo_utilizador();
+    perform 1 from public.perfis;
+    v_falhas := v_falhas || 'T31: o visitante leu a tabela de perfis'::text;
+  exception when others then v_ok := v_ok + 1;
+  end;
+
+  -- ================================================================
+  -- T32 · Conta com email por confirmar não faz marcações
+  -- ================================================================
+  perform set_config('role', 'authenticated', true);
+  perform set_config('request.jwt.claim.sub', v_robo::text, true);
+  begin
+    insert into public.marcacoes (profissional_id, servico_id, inicio)
+    values (v_prof, v_servico, (v_seg + time '17:00') at time zone 'Europe/Lisbon');
+    v_falhas := v_falhas || 'T32: uma conta sem email confirmado fez uma marcação'::text;
+  exception when others then
+    if sqlerrm like '%Confirme o seu email%' then v_ok := v_ok + 1;
+    else v_falhas := v_falhas || ('T32: recusada pelo motivo errado: ' || sqlerrm); end if;
+  end;
+
+  -- ================================================================
+  -- T33 · "Marcar e cancelar" em série: no máximo 3 marcações por hora
+  -- ================================================================
+  perform set_config('request.jwt.claim.sub', v_bia::text, true);
+  begin
+    for v_n in 0..2 loop   -- 3 marcações, cada uma cancelada logo a seguir
+      insert into public.marcacoes (profissional_id, servico_id, inicio)
+      values (v_prof, v_servico, (v_seg + time '15:00' + make_interval(mins => 30 * v_n)) at time zone 'Europe/Lisbon')
+      returning id into v_marcacao;
+      update public.marcacoes set estado = 'cancelada' where id = v_marcacao;
+    end loop;
+
+    begin
+      insert into public.marcacoes (profissional_id, servico_id, inicio)
+      values (v_prof, v_servico, (v_seg + time '17:00') at time zone 'Europe/Lisbon');
+      v_falhas := v_falhas || 'T33: aceitou a 4.ª marcação na mesma hora'::text;
+    exception when others then
+      if sqlerrm like '%Demasiadas marcações%' then v_ok := v_ok + 1;
+      else v_falhas := v_falhas || ('T33: recusada pelo motivo errado: ' || sqlerrm); end if;
+    end;
+  exception when others then
+    v_falhas := v_falhas || ('T33: as 3 primeiras marcações falharam: ' || sqlerrm);
+  end;
+
+  -- ================================================================
+  -- T34 · Cliente com 3 faltas recentes fica sem marcações online
+  -- ================================================================
+  perform set_config('role', 'none', true);                -- "administrador" regista as faltas
+  perform set_config('request.jwt.claim.sub', '', true);
+  insert into public.marcacoes (cliente_id, profissional_id, servico_id, inicio, estado) values
+    (v_caio, v_prof, v_servico, now() - interval '10 days', 'falta'),
+    (v_caio, v_prof, v_servico, now() - interval '20 days', 'falta'),
+    (v_caio, v_prof, v_servico, now() - interval '30 days', 'falta');
+
+  perform set_config('role', 'authenticated', true);
+  perform set_config('request.jwt.claim.sub', v_caio::text, true);
+  begin
+    insert into public.marcacoes (profissional_id, servico_id, inicio)
+    values (v_prof, v_servico, (v_seg + time '17:00') at time zone 'Europe/Lisbon');
+    v_falhas := v_falhas || 'T34: um cliente com 3 faltas fez uma marcação'::text;
+  exception when others then
+    if sqlerrm like '%3 faltas%' then v_ok := v_ok + 1;
+    else v_falhas := v_falhas || ('T34: recusada pelo motivo errado: ' || sqlerrm); end if;
+  end;
+
+  -- ================================================================
   -- RESULTADO (e desfazer tudo)
   -- ================================================================
   perform set_config('role', 'none', true);
 
   if array_length(v_falhas, 1) is null then
-    raise exception E'✅ TODOS OS TESTES PASSARAM (%/24)\n(Esta mensagem aparece como erro de propósito: assim nada do teste fica gravado.)', v_ok;
+    raise exception E'✅ TODOS OS TESTES PASSARAM (%/34)\n(Esta mensagem aparece como erro de propósito: assim nada do teste fica gravado.)', v_ok;
   else
     raise exception E'❌ % teste(s) falharam, % passaram:\n%\n(Nada do teste ficou gravado.)',
       array_length(v_falhas, 1), v_ok, array_to_string(v_falhas, E'\n');
