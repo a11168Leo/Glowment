@@ -27,5 +27,5 @@ export default function Contador({ valor, duracao = 1600, iniciar = true }) {
     return () => cancelAnimationFrame(quadro)
   }, [valor, duracao, iniciar])
 
-  return atual.toLocaleString('pt-BR')
+  return atual.toLocaleString('pt-PT')
 }

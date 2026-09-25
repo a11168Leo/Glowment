@@ -15,7 +15,7 @@ const colunas = [
   {
     titulo: 'Para empresas',
     links: [
-      { texto: 'Cadastrar o meu negócio', para: '/profissional' },
+      { texto: 'Registar o meu negócio', para: '/profissional' },
       { texto: 'Área do profissional', para: '/profissional' },
     ],
   },

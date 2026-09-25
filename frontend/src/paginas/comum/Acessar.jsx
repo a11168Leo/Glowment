@@ -4,7 +4,7 @@ export default function Acessar() {
   return (
     <EmConstrucao
       titulo="Acessar"
-      descricao="Aqui você vai iniciar sessão ou criar a sua conta."
+      descricao="Aqui vai poder iniciar sessão ou criar a sua conta."
     />
   )
 }

@@ -9,7 +9,7 @@ import estilos from './Loja.module.css'
 const TODOS = 'Todos'
 const LIMITE = 8 // quantos produtos aparecem na página inicial
 
-// Capas provisórias por categoria até termos fotos reais
+// Fundo por categoria para produtos que ainda não têm foto
 const capas = {
   Cabelo: 'linear-gradient(135deg, #d9b28f, #946535)',
   Barba: 'linear-gradient(135deg, #5a534c, #1c1b1a)',
@@ -25,7 +25,7 @@ export default function Loja() {
     buscarProdutos().then(setProdutos)
   }, [])
 
-  // Sem nenhum produto cadastrado, a loja não aparece
+  // Sem nenhum produto registado, a loja não aparece
   if (produtos.length === 0) return null
 
   const visiveis = produtos
@@ -66,7 +66,7 @@ export default function Loja() {
             <CartaoProduto
               key={produto.id}
               produto={produto}
-              capa={capas[produto.categoria]}
+              capa={capas[produto.categoria] ?? capas.Cabelo}
               className={estilos.entrar}
               style={{ animationDelay: `${i * 60}ms` }}
             />

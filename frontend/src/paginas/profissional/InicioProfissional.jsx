@@ -4,7 +4,7 @@ export default function InicioProfissional() {
   return (
     <EmConstrucao
       titulo="Área do profissional"
-      descricao="Aqui você vai gerenciar a sua agenda, os seus serviços e a sua loja."
+      descricao="Aqui vai poder gerir a sua agenda, a sua equipa e os seus serviços."
     />
   )
 }

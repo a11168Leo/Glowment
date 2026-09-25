@@ -5,7 +5,7 @@ import Estabelecimentos from './secoes/Estabelecimentos/Estabelecimentos'
 import Loja from './secoes/Loja/Loja'
 
 // Página inicial vista por todos (clientes e profissionais).
-// Estabelecimentos e Loja só aparecem se houver dados cadastrados.
+// Estabelecimentos e Loja só aparecem se houver dados registados.
 export default function Landing() {
   return (
     <>

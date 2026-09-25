@@ -2,20 +2,24 @@ import { Link } from 'react-router-dom'
 import estilos from './CartaoProduto.module.css'
 
 const formatarPreco = (valor) =>
-  valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+  valor.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })
 
 /**
  * Cartão de um produto da loja.
- * capa: fundo da imagem (cor/gradiente) até termos fotos reais.
+ * capa: fundo usado quando o produto ainda não tem foto.
  */
 export default function CartaoProduto({ produto, capa, className = '', style }) {
-  const { nome, vendidoPor, categoria, preco, precoAntigo } = produto
+  const { nome, vendidoPor, categoria, preco, precoAntigo, foto } = produto
   const desconto = precoAntigo ? Math.round((1 - preco / precoAntigo) * 100) : 0
+
+  const fundo = foto
+    ? { backgroundImage: `url(${JSON.stringify(foto)})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+    : { background: capa }
 
   return (
     <article className={`${estilos.cartao} ${className}`} style={style}>
-      <div className={estilos.imagem} style={{ background: capa }}>
-        <span className={estilos.categoria}>{categoria}</span>
+      <div className={estilos.imagem} style={fundo}>
+        {!foto && <span className={estilos.categoria}>{categoria}</span>}
         {desconto > 0 && <span className={estilos.desconto}>-{desconto}%</span>}
       </div>
 
