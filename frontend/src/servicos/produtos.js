@@ -1,6 +1,5 @@
-// Produtos da loja.
-// Enquanto o backend não existe, não há nenhum: a seção da loja fica escondida.
-// Quando a API estiver pronta, é só buscar os dados dela aqui.
+// Loja de produtos: fica para a Fase 3 (com a faturação certificada).
+// Até lá não há produtos no banco, por isso a secção da loja fica escondida.
 
 export const categoriasProdutos = ['Cabelo', 'Barba', 'Pele', 'Unhas']
 

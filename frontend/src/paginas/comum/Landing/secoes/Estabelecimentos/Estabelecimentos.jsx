@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react'
 import Carrossel from '@/componentes/comuns/Carrossel/Carrossel'
 import CartaoEstabelecimento from '@/componentes/comuns/CartaoEstabelecimento/CartaoEstabelecimento'
 import Revelar from '@/componentes/comuns/Revelar/Revelar'
-import { buscarSaloes, buscarBarbearias } from '@/servicos/estabelecimentos'
+import { buscarSaloes, buscarBarbearias } from '@/servicos/saloes'
 import estilos from './Estabelecimentos.module.css'
 
-// Capas provisórias até termos fotos reais dos estabelecimentos
+// Fundos para estabelecimentos que ainda não têm foto
 const capasSaloes = [
   'linear-gradient(135deg, #d9a88f, #946535)',
   'linear-gradient(135deg, #e8c7b8, #b07a5a)',
@@ -27,7 +27,7 @@ export default function Estabelecimentos() {
     buscarBarbearias().then(setBarbearias)
   }, [])
 
-  // Sem nenhum estabelecimento cadastrado, a seção inteira não aparece
+  // Sem nenhum estabelecimento registado, a secção inteira não aparece
   if (saloes.length === 0 && barbearias.length === 0) return null
 
   return (
@@ -35,7 +35,7 @@ export default function Estabelecimentos() {
       <div className={`container ${estilos.lista}`}>
         {saloes.length > 0 && (
           <Revelar>
-            <Carrossel titulo="Salões de beleza" descricao="Os salões mais bem avaliados perto de você.">
+            <Carrossel titulo="Salões de beleza" descricao="Os salões mais bem avaliados perto de si.">
               {saloes.map((salao, i) => (
                 <CartaoEstabelecimento
                   key={salao.id}
