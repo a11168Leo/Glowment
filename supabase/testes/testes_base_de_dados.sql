@@ -469,12 +469,53 @@ begin
   end;
 
   -- ================================================================
+  -- T35 · A auditoria regista a mudança de preço (quem, antes e depois)
+  -- ================================================================
+  perform set_config('role', 'authenticated', true);
+  perform set_config('request.jwt.claim.sub', v_prop::text, true);
+  update public.servicos set preco_cents = 1500 where id = v_servico;
+
+  perform set_config('role', 'none', true);
+  perform set_config('request.jwt.claim.sub', '', true);
+  if exists (
+    select 1 from privado.auditoria
+    where tabela = 'servicos' and operacao = 'UPDATE' and registo_id = v_servico
+      and utilizador_id = v_prop and origem = 'site'
+      and colunas_alteradas = '{preco_cents}'
+      and dados_antes ->> 'preco_cents' = '1200'
+      and dados_depois ->> 'preco_cents' = '1500'
+  ) then v_ok := v_ok + 1;
+  else v_falhas := v_falhas || 'T35: a mudança de preço não ficou na auditoria'::text; end if;
+
+  -- ================================================================
+  -- T36 · A auditoria regista o cancelamento feito pela Ana
+  -- ================================================================
+  if exists (
+    select 1 from privado.auditoria
+    where tabela = 'marcacoes' and utilizador_id = v_ana
+      and 'estado' = any (colunas_alteradas)
+      and dados_depois ->> 'estado' = 'cancelada'
+  ) then v_ok := v_ok + 1;
+  else v_falhas := v_falhas || 'T36: o cancelamento não ficou na auditoria'::text; end if;
+
+  -- ================================================================
+  -- T37 · Utilizadores do site não conseguem ler nem apagar a auditoria
+  -- ================================================================
+  perform set_config('role', 'authenticated', true);
+  perform set_config('request.jwt.claim.sub', v_prop::text, true);
+  begin
+    perform 1 from privado.auditoria;
+    v_falhas := v_falhas || 'T37: um utilizador leu a auditoria'::text;
+  exception when others then v_ok := v_ok + 1;
+  end;
+
+  -- ================================================================
   -- RESULTADO (e desfazer tudo)
   -- ================================================================
   perform set_config('role', 'none', true);
 
   if array_length(v_falhas, 1) is null then
-    raise exception E'✅ TODOS OS TESTES PASSARAM (%/34)\n(Esta mensagem aparece como erro de propósito: assim nada do teste fica gravado.)', v_ok;
+    raise exception E'✅ TODOS OS TESTES PASSARAM (%/37)\n(Esta mensagem aparece como erro de propósito: assim nada do teste fica gravado.)', v_ok;
   else
     raise exception E'❌ % teste(s) falharam, % passaram:\n%\n(Nada do teste ficou gravado.)',
       array_length(v_falhas, 1), v_ok, array_to_string(v_falhas, E'\n');
