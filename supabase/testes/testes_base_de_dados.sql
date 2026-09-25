@@ -510,12 +510,58 @@ begin
   end;
 
   -- ================================================================
+  -- PESQUISA (ficheiro 10) — feita como visitante sem conta
+  -- ================================================================
+  perform set_config('role', 'authenticated', true);
+  perform set_config('request.jwt.claim.sub', v_prop::text, true);
+  update public.servicos set categoria = 'cabelo' where id = v_servico;
+
+  perform set_config('role', 'anon', true);
+  perform set_config('request.jwt.claim.sub', '', true);
+
+  -- T38 · Encontra pelo nome, sem acentos e com um erro de escrita ("barbaria")
+  if exists (select 1 from public.pesquisar_saloes('barbaria') where id = v_salao) then v_ok := v_ok + 1;
+  else v_falhas := v_falhas || 'T38: "barbaria" não encontrou a Barbearia Teste'::text; end if;
+
+  -- T39 · Encontra pela cidade sem acento ("fatima" → Fátima)
+  if exists (select 1 from public.pesquisar_saloes(null, 'fatima') where id = v_salao) then v_ok := v_ok + 1;
+  else v_falhas := v_falhas || 'T39: "fatima" não encontrou o salão de Fátima'::text; end if;
+
+  -- T40 · Encontra pelo serviço ("corte") e pela categoria ("cabelo")
+  if exists (select 1 from public.pesquisar_saloes('corte')  where id = v_salao)
+     and exists (select 1 from public.pesquisar_saloes('cabelo') where id = v_salao) then v_ok := v_ok + 1;
+  else v_falhas := v_falhas || 'T40: a pesquisa por serviço ou categoria falhou'::text; end if;
+
+  -- T41 · Os filtros funcionam (é barbearia e não salão; tem cabelo e não unhas)
+  if exists     (select 1 from public.pesquisar_saloes(null, null, 'barbearia') where id = v_salao)
+     and not exists (select 1 from public.pesquisar_saloes(null, null, 'salao') where id = v_salao)
+     and exists     (select 1 from public.pesquisar_saloes(null, null, null, 'cabelo') where id = v_salao)
+     and not exists (select 1 from public.pesquisar_saloes(null, null, null, 'unhas') where id = v_salao)
+  then v_ok := v_ok + 1;
+  else v_falhas := v_falhas || 'T41: os filtros de categoria falharam'::text; end if;
+
+  -- T42 · Um salão por publicar NUNCA aparece na pesquisa
+  if not exists (select 1 from public.pesquisar_saloes('publicar') where id = v_salao_oculto)
+     and not exists (select 1 from public.pesquisar_saloes(null, null, null, null, 50) where id = v_salao_oculto)
+  then v_ok := v_ok + 1;
+  else v_falhas := v_falhas || 'T42: um salão por publicar apareceu na pesquisa'::text; end if;
+
+  -- T43 · Texto malicioso não rebenta a pesquisa nem devolve demais
+  begin
+    select count(*) into v_n from public.pesquisar_saloes(E'%\' or 1=1; drop table public.saloes; --', null, null, null, 9999);
+    if v_n <= 50 then v_ok := v_ok + 1;
+    else v_falhas := v_falhas || 'T43: devolveu mais de 50 resultados'::text; end if;
+  exception when others then
+    v_falhas := v_falhas || ('T43: a pesquisa rebentou com texto malicioso: ' || sqlerrm);
+  end;
+
+  -- ================================================================
   -- RESULTADO (e desfazer tudo)
   -- ================================================================
   perform set_config('role', 'none', true);
 
   if array_length(v_falhas, 1) is null then
-    raise exception E'✅ TODOS OS TESTES PASSARAM (%/37)\n(Esta mensagem aparece como erro de propósito: assim nada do teste fica gravado.)', v_ok;
+    raise exception E'✅ TODOS OS TESTES PASSARAM (%/43)\n(Esta mensagem aparece como erro de propósito: assim nada do teste fica gravado.)', v_ok;
   else
     raise exception E'❌ % teste(s) falharam, % passaram:\n%\n(Nada do teste ficou gravado.)',
       array_length(v_falhas, 1), v_ok, array_to_string(v_falhas, E'\n');

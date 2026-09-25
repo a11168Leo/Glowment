@@ -20,7 +20,14 @@ async function buscarPorCategoria(categoria) {
     return []
   }
 
-  return data.map((salao) => ({
+  return data.map((salao) =>
+    paraCartao({ ...salao, servicos: salao.servicos.map((servico) => servico.nome) }),
+  )
+}
+
+// Converte uma linha da base de dados no formato que o CartaoEstabelecimento usa
+function paraCartao(salao) {
+  return {
     id: salao.id,
     nome: salao.nome,
     slug: salao.slug,
@@ -31,8 +38,40 @@ async function buscarPorCategoria(categoria) {
     foto: salao.capa_path
       ? supabase.storage.from('saloes').getPublicUrl(salao.capa_path).data.publicUrl
       : null,
-    servicos: salao.servicos.slice(0, 3).map((servico) => servico.nome),
-  }))
+    servicos: (salao.servicos ?? []).slice(0, 3),
+  }
+}
+
+/**
+ * Pesquisa salões e barbearias (função "pesquisar_saloes" na base de dados).
+ * Ignora acentos e maiúsculas e tolera erros de escrita ("barbaria" → Barbearia).
+ *
+ * Todos os campos são opcionais:
+ *   texto            → nome do salão, cidade ou serviço ("aurora", "corte", "unhas")
+ *   local            → cidade ("lisboa")
+ *   categoria        → 'salao' ou 'barbearia'
+ *   categoriaServico → 'cabelo', 'barba', 'unhas', 'sobrancelhas', 'estetica',
+ *                      'maquilhagem', 'depilacao', 'massagem' ou 'outro'
+ *
+ * Exemplo: pesquisarSaloes({ texto: 'corte', local: 'porto' })
+ */
+export async function pesquisarSaloes({ texto, local, categoria, categoriaServico } = {}) {
+  if (!supabase) return []
+
+  const { data, error } = await supabase.rpc('pesquisar_saloes', {
+    p_texto: texto || null,
+    p_local: local || null,
+    p_categoria: categoria || null,
+    p_categoria_servico: categoriaServico || null,
+    p_limite: 20,
+  })
+
+  if (error) {
+    console.error('Erro na pesquisa:', error.message)
+    return []
+  }
+
+  return data.map(paraCartao)
 }
 
 export function buscarSaloes() {

@@ -36,8 +36,9 @@ begin
   returning id into v_salao;
 
   for v_item in select * from jsonb_array_elements(p_servicos) loop
-    insert into public.servicos (salao_id, nome, duracao_min, preco_cents)
-    values (v_salao, v_item ->> 'nome', (v_item ->> 'min')::int, (v_item ->> 'cents')::int);
+    insert into public.servicos (salao_id, nome, categoria, duracao_min, preco_cents)
+    values (v_salao, v_item ->> 'nome', (v_item ->> 'cat')::public.categoria_servico,
+            (v_item ->> 'min')::int, (v_item ->> 'cents')::int);
   end loop;
 
   foreach v_nome in array p_profissionais loop
@@ -108,44 +109,44 @@ begin
   v_s1 := pg_temp.criar_salao_demo(v_salao_prop, 'salao',
     'Studio Aurora', 'studio-aurora', 'Cortes, coloração e tratamentos capilares num espaço luminoso no centro de Lisboa.',
     'Rua Augusta 120', '1100-053', 'Lisboa', array['Sofia', 'Carla'],
-    '[{"nome":"Corte e brushing","min":60,"cents":3500},
-      {"nome":"Coloração","min":90,"cents":5500},
-      {"nome":"Tratamento de hidratação","min":45,"cents":2500}]');
+    '[{"nome":"Corte e brushing","cat":"cabelo","min":60,"cents":3500},
+      {"nome":"Coloração","cat":"cabelo","min":90,"cents":5500},
+      {"nome":"Tratamento de hidratação","cat":"cabelo","min":45,"cents":2500}]');
 
   v_s2 := pg_temp.criar_salao_demo(v_salao_prop, 'salao',
     'Maison Belle', 'maison-belle', 'Salão de beleza com serviços de cabelo, unhas e sobrancelhas.',
     'Rua de Santa Catarina 300', '4000-443', 'Porto', array['Beatriz'],
-    '[{"nome":"Corte feminino","min":45,"cents":2800},
-      {"nome":"Manicure","min":40,"cents":1500},
-      {"nome":"Design de sobrancelhas","min":30,"cents":1200}]');
+    '[{"nome":"Corte feminino","cat":"cabelo","min":45,"cents":2800},
+      {"nome":"Manicure","cat":"unhas","min":40,"cents":1500},
+      {"nome":"Design de sobrancelhas","cat":"sobrancelhas","min":30,"cents":1200}]');
 
   v_s3 := pg_temp.criar_salao_demo(v_salao_prop, 'salao',
     'Espaço Lótus', 'espaco-lotus', 'Estética e bem-estar junto à universidade.',
     'Avenida Sá da Bandeira 50', '3000-350', 'Coimbra', array['Marta', 'Joana'],
-    '[{"nome":"Limpeza de pele","min":60,"cents":4000},
-      {"nome":"Depilação com cera","min":30,"cents":1800},
-      {"nome":"Pedicure","min":45,"cents":2000}]');
+    '[{"nome":"Limpeza de pele","cat":"estetica","min":60,"cents":4000},
+      {"nome":"Depilação com cera","cat":"depilacao","min":30,"cents":1800},
+      {"nome":"Pedicure","cat":"unhas","min":45,"cents":2000}]');
 
   -- ---------------- Barbearias ----------------
   v_b1 := pg_temp.criar_salao_demo(v_barb_prop, 'barbearia',
     'Barbearia do Bairro', 'barbearia-do-bairro', 'Barbearia tradicional com toalha quente e navalha.',
     'Rua da Rosa 45', '1200-383', 'Lisboa', array['Tiago', 'Nuno'],
-    '[{"nome":"Corte masculino","min":30,"cents":1400},
-      {"nome":"Barba","min":20,"cents":1000},
-      {"nome":"Corte e barba","min":45,"cents":2200}]');
+    '[{"nome":"Corte masculino","cat":"cabelo","min":30,"cents":1400},
+      {"nome":"Barba","cat":"barba","min":20,"cents":1000},
+      {"nome":"Corte e barba","cat":"barba","min":45,"cents":2200}]');
 
   v_b2 := pg_temp.criar_salao_demo(v_barb_prop, 'barbearia',
     'Navalha Norte', 'navalha-norte', 'Degradês, desenhos e cuidados de barba no coração do Porto.',
     'Rua das Flores 80', '4050-265', 'Porto', array['Ricardo'],
-    '[{"nome":"Corte degradê","min":40,"cents":1600},
-      {"nome":"Barba com toalha quente","min":30,"cents":1200}]');
+    '[{"nome":"Corte degradê","cat":"cabelo","min":40,"cents":1600},
+      {"nome":"Barba com toalha quente","cat":"barba","min":30,"cents":1200}]');
 
   v_b3 := pg_temp.criar_salao_demo(v_barb_prop, 'barbearia',
     'Clube do Bigode', 'clube-do-bigode', 'Barbearia moderna para estudantes e não só.',
     'Rua Ferreira Borges 20', '3000-179', 'Coimbra', array['André', 'Miguel'],
-    '[{"nome":"Corte masculino","min":30,"cents":1200},
-      {"nome":"Corte de criança","min":25,"cents":1000},
-      {"nome":"Barba","min":20,"cents":800}]');
+    '[{"nome":"Corte masculino","cat":"cabelo","min":30,"cents":1200},
+      {"nome":"Corte de criança","cat":"cabelo","min":25,"cents":1000},
+      {"nome":"Barba","cat":"barba","min":20,"cents":800}]');
 
   -- ---------------- Avaliações (marcações antigas concluídas) ----------------
   perform pg_temp.avaliacao_demo(v_cliente, v_s1, 30, 5, 'Adorei o corte, voltarei de certeza!');
